@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply antialiased text-gray-900;
+  }
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 25s linear infinite;
+}
+
+.animate-scroll-right {
+  animation: scroll-right 25s linear infinite;
+}
+
+.integration-row {
+  will-change: transform;
+  display: flex;
+  gap: 2rem;
+}
+
+.integration-row > * {
+  flex: 0 0 auto;
+}
