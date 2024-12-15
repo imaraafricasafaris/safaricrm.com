@@ -122,7 +122,7 @@ export default function Landing() {
 
               {/* Dashboard Screenshot */}
               <img
-                src="/src/img/landing_white.png"
+                src="/img/landing_white.png"
                 alt="Safari CRM Dashboard"
                 className="w-full rounded-b-xl shadow-2xl"
               />
@@ -130,7 +130,7 @@ export default function Landing() {
               {/* Mobile App Preview */}
               <div className="absolute -right-4 -bottom-10 lg:right-0 lg:-bottom-16">
                 <img
-                  src="/src/img/iphone.png"
+                  src="/img/iphone.png"
                   alt="Safari CRM Mobile App"
                   className="w-[140px] md:w-[180px] lg:w-[220px] h-auto transform rotate-[-8deg]"
                 />
@@ -151,14 +151,14 @@ export default function Landing() {
           </div>
           <div className="flex justify-center items-center gap-8 flex-wrap">
             {[
-              { name: 'TripAdvisor', path: '/src/img/partners/tripadvisor.png' },
-              { name: 'Kenya Airways', path: '/src/img/partners/Kenya_Airways-Logo.wine.svg' },
-              { name: 'Serena Hotels', path: '/src/img/partners/serena-hotel-colored-logo.svg' },
-              { name: 'Safari Bookings', path: '/src/img/partners/safari-bookings.png' },
-              { name: 'KWS', path: '/src/img/partners/KWS.png' },
-              { name: 'Eco Tourism Kenya', path: '/src/img/partners/Eco-tourism_Kenya.png' },
-              { name: 'Trustpilot', path: '/src/img/partners/trustpilot.png' },
-              { name: 'TRA', path: '/src/img/partners/tra.png' }
+              { name: 'TripAdvisor', path: '/img/partners/tripadvisor.png' },
+              { name: 'Kenya Airways', path: '/img/partners/Kenya_Airways-Logo.wine.svg' },
+              { name: 'Serena Hotels', path: '/img/partners/serena-hotel-colored-logo.svg' },
+              { name: 'Safari Bookings', path: '/img/partners/safari-bookings.png' },
+              { name: 'KWS', path: '/img/partners/KWS.png' },
+              { name: 'Eco Tourism Kenya', path: '/img/partners/Eco-tourism_Kenya.png' },
+              { name: 'Trustpilot', path: '/img/partners/trustpilot.png' },
+              { name: 'TRA', path: '/img/partners/tra.png' }
             ].map((partner) => (
               <motion.img
                 key={partner.name}
@@ -190,7 +190,7 @@ export default function Landing() {
                   Safari CRM is up to 50% faster than other CRMs—which helps your team work faster and easier. More bookings managed = more safaris organized. Plus, Safari CRM is designed for your team to use all day, every day. In the real world, you shouldn’t need a computer science degree to use your CRM. Getting started with Safari CRM takes hours, not weeks or months.
                 </p>
                 <div className="flex items-start gap-4 text-gray-600 italic">
-                  <img src="/src/img/logos/logo.png" alt="Safari CRM Logo" className="w-10 h-10 rounded-full" />
+                  <img src="/img/logos/logo.png" alt="Safari CRM Logo" className="w-10 h-10 rounded-full" />
                   <div>
                     <p className="mb-2">
                       "The ease of use from a tour operator’s seat is crucial. There is zero clutter or unnecessary steps. It’s click, call, text, email, notes—all in one convenient spot."
@@ -201,7 +201,7 @@ export default function Landing() {
               </div>
               <div className="flex-1">
                 <img 
-                  src="/src/img/landing_dark.png" 
+                  src="/img/landing_dark.png" 
                   alt="Safari CRM Interface" 
                   className="rounded-lg shadow-2xl w-full"
                 />
@@ -218,7 +218,7 @@ export default function Landing() {
                   Stop juggling multiple tools just to organize a safari. Customers can get lost in the shuffle! We believe in keeping it simple. Every tool you need in your safari management process either lives within Safari CRM or integrates with it seamlessly. You’ll make phone calls, send emails, manage follow-ups, and track your pipeline, all without ever leaving Safari CRM.
                 </p>
                 <div className="flex items-start gap-4 text-gray-600 italic">
-                  <img src="/src/img/logos/logo.png" alt="Safari CRM Logo" className="w-10 h-10 rounded-full" />
+                  <img src="/img/logos/logo.png" alt="Safari CRM Logo" className="w-10 h-10 rounded-full" />
                   <div>
                     <p className="mb-2">
                       "Safari CRM has been a game changer for our team. I love how we can send texts, emails, set reminders, create tasks, and schedule reach outs all in one place. It’s absolutely up-leveled our team, our service, and our sales."
@@ -229,7 +229,7 @@ export default function Landing() {
               </div>
               <div className="flex-1">
                 <img 
-                  src="/src/img/leads_1.png" 
+                  src="/img/leads_1.png" 
                   alt="Safari CRM Features" 
                   className="rounded-lg shadow-2xl w-full"
                 />
@@ -264,7 +264,7 @@ export default function Landing() {
                   transition={{ duration: 0.6, delay: 0.4 }}
                   className="flex items-start gap-4 text-gray-600 italic"
                 >
-                  <img src="/src/img/logos/logo.png" alt="Safari CRM Logo" className="w-10 h-10 rounded-full" />
+                  <img src="/img/logos/logo.png" alt="Safari CRM Logo" className="w-10 h-10 rounded-full" />
                   <div>
                     <p className="mb-2">
                       "I can automate responses, emails and trigger actions very easily, improving my chances of closing a lot more safari bookings."
@@ -281,7 +281,7 @@ export default function Landing() {
                 className="flex-1"
               >
                 <img 
-                  src="/src/img/staff.png" 
+                  src="/img/staff.png" 
                   alt="Safari CRM Automation" 
                   className="rounded-lg shadow-2xl w-full"
                 />
@@ -879,7 +879,7 @@ export default function Landing() {
           <div className="text-center mb-12">
             <div className="w-20 h-20 mx-auto mb-8 relative">
               <div className="absolute inset-0 bg-blue-500 opacity-20 rounded-full blur-xl"></div>
-              <img src="/src/img/logos/logo.png" alt="Safari CRM Logo" className="relative w-full h-full object-contain" />
+              <img src="/img/logos/logo.png" alt="Safari CRM Logo" className="relative w-full h-full object-contain" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Join the thousands of small businesses
@@ -936,7 +936,7 @@ export default function Landing() {
             {/* Dashboard Image */}
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-b-xl"></div>
-              <img src="/src/img/landing_white.png" alt="Safari CRM Dashboard" className="w-full h-auto rounded-b-xl shadow-2xl" />
+              <img src="/img/landing_white.png" alt="Safari CRM Dashboard" className="w-full h-auto rounded-b-xl shadow-2xl" />
             </div>
 
             {/* Decorative Elements */}
@@ -969,7 +969,7 @@ export default function Landing() {
             {/* Right Column - Image */}
             <div className="relative">
               <img
-                src="/src/img/landing_white.png"
+                src="/img/landing_white.png"
                 alt="Safari CRM Dashboard Preview"
                 className="w-full h-auto rounded-lg shadow-xl"
               />
