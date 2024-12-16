@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   server: {
-    host: true, // Allow access from any IP
+    host: true,
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -29,5 +29,5 @@ export default defineConfig({
       },
     },
   },
-  base: '/', // This can be changed to your subdirectory if needed
+  base: '/safaricrm.com/', // GitHub Pages repository name
 });
