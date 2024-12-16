@@ -8,24 +8,29 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  base: './',
+  base: '/',
+  publicDir: 'public',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
       output: {
-        manualChunks: undefined,
-        assetFileNames: (assetInfo) => {
-          if (/\.(jpe?g|png|gif|svg|ico)$/i.test(assetInfo.name)) {
-            return 'assets/images/[name].[hash][ext]';
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: ({name}) => {
+          if (/\.(gif|jpe?g|png|svg)$/i.test(name ?? '')) {
+            return 'assets/img/[name]-[hash][extname]';
           }
-          return 'assets/[name].[hash][ext]';
+          if (/\.css$/i.test(name ?? '')) {
+            return 'assets/css/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
         },
-        chunkFileNames: 'assets/js/[name].[hash].js',
-        entryFileNames: 'assets/js/[name].[hash].js',
       },
     },
     assetsInlineLimit: 4096,

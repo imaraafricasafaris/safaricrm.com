@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Menu } from 'lucide-react';
+import { Images } from '../../utils/images';
 
 export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -11,7 +12,7 @@ export default function TopNav() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/src/img/logos/logo.png" alt="Safari CRM" className="h-8 w-auto" />
+            <img src={Images.logo} alt="Safari CRM" className="h-8 w-auto" />
             <span className="font-semibold text-lg text-gray-900">Safaricrm</span>
           </Link>
 
@@ -49,49 +50,54 @@ export default function TopNav() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden shadow-lg bg-white border-gray-200 border-t">
-          <div className="px-4 py-3 space-y-1">
-            <Link
-              to="#features"
-              className="block px-3 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100"
-            >
-              Features
-            </Link>
-            <Link
-              to="#pricing"
-              className="block px-3 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100"
-            >
-              Pricing
-            </Link>
-            <Link
-              to="#about"
-              className="block px-3 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100"
-            >
-              About
-            </Link>
-            <Link
-              to="#contact"
-              className="block px-3 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100"
-            >
-              Contact
-            </Link>
-            <Link
-              to="/login"
-              className="block px-3 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100"
-            >
-              Sign in
-            </Link>
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4">
+            <div className="flex flex-col gap-4">
+              <Link
+                to="#features"
+                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
+              </Link>
+              <Link
+                to="#pricing"
+                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                to="#about"
+                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                to="#contact"
+                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <Link
+                to="/login"
+                className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign in
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 }
