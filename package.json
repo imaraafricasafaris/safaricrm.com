@@ -1,11 +1,12 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "safari-crm",
+  "homepage": ".",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write ."
