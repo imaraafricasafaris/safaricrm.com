@@ -204,23 +204,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/update-password`,
-      captchaToken: undefined,
     });
     if (error) throw error;
   };
 
   const updatePassword = async (newPassword: string) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (error) throw error;
-
-      // Sign out after password update to force re-login with new password
-      await supabase.auth.signOut();
-    } catch (error) {
-      throw error;
-    }
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    if (error) throw error;
   };
 
   return (

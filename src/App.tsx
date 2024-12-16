@@ -1,5 +1,5 @@
 import React from 'react';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/api/ErrorBoundary';
@@ -38,346 +38,164 @@ import Notifications from './pages/Notifications';
 import Subscription from './pages/Subscription';
 import Branches from './pages/Branches';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <Landing />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/login',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <Login />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/signup',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <Signup />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/reset-password',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <ResetPassword />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/update-password',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <UpdatePassword />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/superadmin/login',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <SuperAdminLogin />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/superadmin/signup',
-    element: (
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <SuperAdminSignup />
-      </ErrorBoundary>
-    ),
-  },
-  {
-    path: '/super-admin',
-    element: (
-      <ProtectedRoute requiredRole="super_admin">
-        <SuperAdminLayout>
-          <Outlet />
-        </SuperAdminLayout>
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        path: '',
-        element: <SuperAdminDashboard />,
-      },
-      {
-        path: 'companies',
-        element: <Companies />,
-      },
-      {
-        path: 'users',
-        element: <Users />,
-      },
-      {
-        path: 'subscriptions',
-        element: <Subscriptions />,
-      },
-      {
-        path: 'api-keys',
-        element: <ApiKeys />,
-      },
-      {
-        path: 'settings',
-        element: <Settings />,
-      },
-    ],
-  },
-  {
-    path: '/',
-    element: (
-      <ProtectedRoute requiredRole="company">
-        <MainLayout>
-          <Outlet />
-        </MainLayout>
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        path: 'dashboard',
-        element: <Dashboard />,
-      },
-      {
-        path: 'leads',
-        element: <Leads />,
-      },
-      {
-        path: 'clients',
-        element: <Clients />,
-      },
-      {
-        path: 'tasks',
-        element: <Tasks />,
-      },
-      {
-        path: 'calendar',
-        element: <Calendar />,
-      },
-      {
-        path: 'documents',
-        element: <Documents />,
-      },
-      {
-        path: 'reports',
-        element: <Reports />,
-      },
-      {
-        path: 'staff',
-        element: <Staff />,
-      },
-      {
-        path: 'profile',
-        element: <Profile />,
-      },
-      {
-        path: 'settings',
-        element: <Settings />,
-      },
-      {
-        path: 'notifications',
-        element: <Notifications />,
-      },
-      {
-        path: 'subscription',
-        element: <Subscription />,
-      },
-      {
-        path: 'branches',
-        element: <Branches />,
-      },
-      {
-        path: 'modules',
-        element: <Modules />,
-      },
-    ],
-  },
-  {
-    path: '/api-dashboard/*',
-    element: (
-      <ProtectedRoute requiredRole="super_admin">
-        <ApiDashboard />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '*',
-    element: (
-      <Navigate to={!useAuth().user ? '/login' : useAuth().userRole === 'super_admin' ? '/super-admin' : '/dashboard'} replace />
-    ),
-  },
-], {
-  future: {
-    v7_startTransition: true,
-    v7_relativeSplatPath: true,
-  },
-});
+const App = () => {
+  const { user, userRole } = useAuth();
 
-function App() {
   return (
-    <RouterProvider router={router} />
+    <ErrorBoundary>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+      <Routes>
+        {/* Public Routes */}
+        <Route
+          path="/"
+          element={
+            !user ? (
+              <Landing />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            !user ? (
+              <Login />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            !user ? (
+              <Signup />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            !user ? (
+              <ResetPassword />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/update-password"
+          element={
+            !user ? (
+              <UpdatePassword />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/superadmin/login"
+          element={!user ? <SuperAdminLogin /> : <Navigate to="/super-admin" />}
+        />
+        <Route
+          path="/superadmin/signup"
+          element={!user ? <SuperAdminSignup /> : <Navigate to="/super-admin" />}
+        />
+
+        {/* Super Admin Routes */}
+        <Route
+          path="/super-admin"
+          element={
+            <ProtectedRoute requiredRole="super_admin">
+              <SuperAdminLayout>
+                <Outlet />
+              </SuperAdminLayout>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<SuperAdminDashboard />} />
+          <Route path="companies" element={<Companies />} />
+          <Route path="users" element={<Users />} />
+          <Route path="subscriptions" element={<Subscriptions />} />
+          <Route path="api-keys" element={<ApiKeys />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* Main CRM Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute requiredRole="company">
+              <MainLayout>
+                <Outlet />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="leads" element={<Leads />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="calendar" element={<Calendar />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="staff" element={<Staff />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="subscription" element={<Subscription />} />
+          <Route path="branches" element={<Branches />} />
+          <Route path="modules" element={<Modules />} />
+        </Route>
+
+        {/* API Dashboard */}
+        <Route
+          path="/api-dashboard/*"
+          element={<ProtectedRoute requiredRole="super_admin"><ApiDashboard /></ProtectedRoute>}
+        />
+
+        {/* Catch-all redirect */}
+        <Route
+          path="*"
+          element={<Navigate to={!user ? '/login' : userRole === 'super_admin' ? '/super-admin' : '/dashboard'} replace />}
+        />
+      </Routes>
+    </ErrorBoundary>
   );
-}
+};
 
 export default App;
