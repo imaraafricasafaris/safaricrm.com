@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/api/ErrorBoundary';
@@ -38,28 +38,54 @@ import Notifications from './pages/Notifications';
 import Subscription from './pages/Subscription';
 import Branches from './pages/Branches';
 
-const App = () => {
+// Layout components
+const DashboardLayout = () => {
   const { user, userRole } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  return <Outlet />;
+};
 
+const SuperAdminDashboardLayout = () => {
+  const { user, userRole } = useAuth();
+  if (!user || userRole !== 'super_admin') return <Navigate to="/superadmin/login" />;
+  return <SuperAdminLayout><Outlet /></SuperAdminLayout>;
+};
+
+const PublicLayout = () => {
+  const { user, userRole } = useAuth();
+  const location = useLocation();
+
+  if (user) {
+    if (userRole === 'super_admin') {
+      return <Navigate to="/super-admin" state={{ from: location }} replace />;
+    }
+    return <Navigate to="/dashboard" state={{ from: location }} replace />;
+  }
+  return <Outlet />;
+};
+
+function App() {
   return (
     <ErrorBoundary>
       <Toaster 
         position="top-right"
         toastOptions={{
-          duration: 3000,
+          duration: 4000,
           style: {
             background: '#333',
             color: '#fff',
           },
           success: {
+            duration: 3000,
             iconTheme: {
-              primary: '#10B981',
+              primary: '#4ade80',
               secondary: '#fff',
             },
           },
           error: {
+            duration: 4000,
             iconTheme: {
-              primary: '#EF4444',
+              primary: '#ef4444',
               secondary: '#fff',
             },
           },
@@ -67,86 +93,18 @@ const App = () => {
       />
       <Routes>
         {/* Public Routes */}
-        <Route
-          path="/"
-          element={
-            !user ? (
-              <Landing />
-            ) : userRole === 'super_admin' ? (
-              <Navigate to="/super-admin" />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            !user ? (
-              <Login />
-            ) : userRole === 'super_admin' ? (
-              <Navigate to="/super-admin" />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            !user ? (
-              <Signup />
-            ) : userRole === 'super_admin' ? (
-              <Navigate to="/super-admin" />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            !user ? (
-              <ForgotPassword />
-            ) : userRole === 'super_admin' ? (
-              <Navigate to="/super-admin" />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/reset-password"
-          element={
-            !user ? (
-              <ResetPassword />
-            ) : userRole === 'super_admin' ? (
-              <Navigate to="/super-admin" />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/superadmin/login"
-          element={!user ? <SuperAdminLogin /> : <Navigate to="/super-admin" />}
-        />
-        <Route
-          path="/superadmin/signup"
-          element={!user ? <SuperAdminSignup /> : <Navigate to="/super-admin" />}
-        />
+        <Route path="/" element={<PublicLayout />}>
+          <Route index element={<Landing />} />
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="superadmin/login" element={<SuperAdminLogin />} />
+          <Route path="superadmin/signup" element={<SuperAdminSignup />} />
+        </Route>
 
         {/* Super Admin Routes */}
-        <Route
-          path="/super-admin"
-          element={
-            <ProtectedRoute requiredRole="super_admin">
-              <SuperAdminLayout>
-                <Outlet />
-              </SuperAdminLayout>
-            </ProtectedRoute>
-          }
-        >
+        <Route path="/super-admin" element={<SuperAdminDashboardLayout />}>
           <Route index element={<SuperAdminDashboard />} />
           <Route path="companies" element={<Companies />} />
           <Route path="users" element={<Users />} />
@@ -155,18 +113,9 @@ const App = () => {
           <Route path="settings" element={<Settings />} />
         </Route>
 
-        {/* Main CRM Routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute requiredRole="company">
-              <MainLayout>
-                <Outlet />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        >
-          <Route path="dashboard" element={<Dashboard />} />
+        {/* Protected Dashboard Routes */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
           <Route path="leads" element={<Leads />} />
           <Route path="clients" element={<Clients />} />
           <Route path="tasks" element={<Tasks />} />
@@ -188,14 +137,11 @@ const App = () => {
           element={<ProtectedRoute requiredRole="super_admin"><ApiDashboard /></ProtectedRoute>}
         />
 
-        {/* Catch-all redirect */}
-        <Route
-          path="*"
-          element={<Navigate to={!user ? '/login' : userRole === 'super_admin' ? '/super-admin' : '/dashboard'} replace />}
-        />
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to={!useAuth().user ? '/login' : useAuth().userRole === 'super_admin' ? '/super-admin' : '/dashboard'} replace />} />
       </Routes>
     </ErrorBoundary>
   );
-};
+}
 
 export default App;

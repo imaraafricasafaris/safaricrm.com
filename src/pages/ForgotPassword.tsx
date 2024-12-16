@@ -14,14 +14,54 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await resetPassword(email);
       setIsSuccess(true);
-      toast.success('Password reset link sent to your email!');
+      toast.success('Password reset link sent! Please check your email.', {
+        duration: 5000,
+        icon: '✉️',
+      });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send reset link');
+      console.error('Password reset error:', error);
+      
+      // Handle specific error cases
+      if (error.message.includes('No account found')) {
+        toast.error('No account found with this email address', {
+          duration: 6000,
+          icon: '❌',
+        });
+      } else if (error.message.includes('rate limit')) {
+        toast.error('Too many attempts. Please try again later.', {
+          duration: 6000,
+          icon: '⏳',
+        });
+        setEmail(''); // Clear the form on rate limit
+      } else if (error.message.includes('Invalid email')) {
+        toast.error('Please enter a valid email address', {
+          duration: 4000,
+          icon: '✉️',
+        });
+      } else {
+        toast.error(error.message || 'Failed to send reset link', {
+          duration: 6000,
+          icon: '❌',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
