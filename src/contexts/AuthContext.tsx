@@ -12,8 +12,6 @@ interface AuthContextType {
   signIn: (email: string, password: string, role?: UserRole) => Promise<void>;
   signUp: (email: string, password: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -201,83 +199,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const resetPassword = async (email: string) => {
-    try {
-      console.log('Reset password redirect URL:', `${import.meta.env.VITE_SITE_URL}/reset-password`);
-      
-      // First check if the user exists using auth.admin API
-      const { data: { users }, error: userError } = await supabase.auth.admin.listUsers({
-        filters: {
-          email: email
-        }
-      });
-
-      if (userError) {
-        console.error('Error checking user existence:', userError);
-        throw new Error('Failed to verify email');
-      }
-
-      if (!users || users.length === 0) {
-        throw new Error('No account found with this email address');
-      }
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${import.meta.env.VITE_SITE_URL}/reset-password`,
-      });
-
-      if (error) {
-        console.error('Reset password error:', error);
-        if (error.message.includes('rate limit')) {
-          throw new Error('Too many attempts. Please try again later.');
-        }
-        throw error;
-      }
-
-    } catch (error: any) {
-      console.error('Reset password error:', error);
-      throw error;
-    }
-  };
-
-  const updatePassword = async (newPassword: string) => {
-    try {
-      const { data, error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) {
-        console.error('Update password error:', error);
-        if (error.message.includes('auth')) {
-          throw new Error('Your password reset link has expired. Please request a new one.');
-        }
-        throw new Error(error.message || 'Failed to update password');
-      }
-
-      // Log success
-      console.log('Password updated successfully:', data);
-      return data;
-    } catch (error: any) {
-      console.error('Update password error:', error);
-      throw new Error(
-        error.message || 'Failed to update password. Please try again later.'
-      );
-    }
-  };
-
-  const value = {
-    user,
-    loading,
-    userRole,
-    error,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-    updatePassword,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      userRole,
+      error,
+      signIn,
+      signUp,
+      signOut
+    }}>
       {initialized ? children : null}
     </AuthContext.Provider>
   );
