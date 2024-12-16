@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, ArrowLeft, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { Images } from '../utils/images';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,12 +19,15 @@ export default function ResetPassword() {
 
   useEffect(() => {
     // Check if we have the access token in the URL
-    const hash = window.location.hash;
-    if (!hash || !hash.includes('access_token')) {
+    const params = new URLSearchParams(location.hash.substring(1)); // Remove the # from the hash
+    const accessToken = params.get('access_token');
+    const type = params.get('type');
+
+    if (!accessToken || type !== 'recovery') {
       toast.error('Invalid or expired reset link');
       navigate('/forgot-password');
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +54,7 @@ export default function ResetPassword() {
         navigate('/login');
       }, 3000);
     } catch (error: any) {
+      console.error('Update password error:', error);
       toast.error(error.message || 'Failed to reset password');
     } finally {
       setIsLoading(false);

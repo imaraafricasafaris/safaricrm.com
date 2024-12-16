@@ -202,17 +202,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
+    // Get the current origin (e.g., http://localhost:5173 in development)
+    const origin = window.location.origin;
+    const redirectPath = '/reset-password';
+    const redirectTo = `${origin}${redirectPath}`;
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo,
     });
-    if (error) throw error;
+    
+    if (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
   };
 
   const updatePassword = async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        console.error('Update password error:', error);
+        throw error;
+      }
+
+      // Sign out after password change to ensure clean state
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Update password error:', error);
+      throw error;
+    }
   };
 
   const value = {
