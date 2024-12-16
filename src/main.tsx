@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ModuleProvider } from './contexts/ModuleContext';
@@ -12,11 +12,20 @@ import './index.css';
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
 
+const router = createBrowserRouter([
+  // Your routes here
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+});
+
 const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
-    <BrowserRouter>
+    <RouterProvider router={router}>
       <AuthProvider>
         <ThemeProvider>
           <ModuleProvider>
@@ -28,6 +37,6 @@ root.render(
           </ModuleProvider>
         </ThemeProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </RouterProvider>
   </StrictMode>
 );
