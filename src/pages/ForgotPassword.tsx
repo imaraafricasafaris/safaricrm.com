@@ -21,18 +21,7 @@ export default function ForgotPassword() {
       setIsSuccess(true);
       toast.success('Password reset link sent to your email!');
     } catch (error: any) {
-      console.error('Password reset error:', error);
-      let errorMessage = 'Failed to send reset link';
-      
-      if (error.message.includes('Email rate limit exceeded')) {
-        errorMessage = 'Too many reset attempts. Please try again later.';
-      } else if (error.message.includes('User not found')) {
-        errorMessage = 'No account found with this email address.';
-      } else if (error.message.includes('Invalid email')) {
-        errorMessage = 'Please enter a valid email address.';
-      }
-      
-      toast.error(errorMessage);
+      toast.error(error.message || 'Failed to send reset link');
     } finally {
       setIsLoading(false);
     }

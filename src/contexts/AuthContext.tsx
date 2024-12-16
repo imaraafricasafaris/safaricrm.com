@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../utils/supabase';
+import { supabase, handleSupabaseError } from '../lib/supabase';
 import { UserRole } from '../lib/api/auth';
 import toast from 'react-hot-toast';
-import config from '../config';
 
 interface AuthContextType {
   user: User | null;
@@ -155,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       toast.success('Successfully logged in!');
     } catch (error) {
-      console.error('Sign in error:', error);
+      handleSupabaseError(error, 'Failed to sign in');
       throw error;
     } finally {
       setLoading(false);
@@ -175,8 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       toast.success('Account created! Please check your email to verify your account.');
     } catch (error) {
-      console.error('Sign up error:', error);
-      throw error;
+      handleSupabaseError(error, 'Failed to create account');
     }
   };
 
@@ -197,46 +195,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success('Signed out successfully');
       
     } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
+      handleSupabaseError(error, 'Failed to sign out');
     } finally {
       setLoading(false);
     }
   };
 
   const resetPassword = async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${config.baseUrl}/reset-password`,
-      });
-      
-      if (error) {
-        console.error('Reset password error:', error);
-        throw error;
-      }
-    } catch (error) {
-      console.error('Reset password error:', error);
-      throw error;
-    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
   };
 
   const updatePassword = async (newPassword: string) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) {
-        console.error('Update password error:', error);
-        throw error;
-      }
-
-      // Sign out after password change to ensure clean state
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Update password error:', error);
-      throw error;
-    }
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) throw error;
   };
 
   const value = {
