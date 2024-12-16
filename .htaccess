@@ -1,19 +1,23 @@
-# Set correct MIME types for JavaScript modules
+# Set correct MIME types
 AddType application/javascript .js
 AddType application/javascript .mjs
-AddType text/javascript .js
-AddType text/javascript .mjs
+AddType application/javascript .jsx
+AddType application/javascript .ts
+AddType application/javascript .tsx
+
+# Force all JavaScript files to be served as JavaScript regardless of extension
+<FilesMatch "\.(js|mjs|jsx|ts|tsx)$">
+    ForceType application/javascript
+    Header set Content-Type application/javascript
+</FilesMatch>
 
 # Handle JSON files
 AddType application/json .json
 
-# Handle TypeScript files
-AddType application/x-typescript .ts
-AddType application/x-typescript .tsx
-
 # Enable CORS
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
+    Header set X-Content-Type-Options "nosniff"
 </IfModule>
 
 # Serve all files with UTF-8 encoding
@@ -28,4 +32,16 @@ AddDefaultCharset utf-8
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-l
     RewriteRule . /index.html [L]
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Set security headers
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 </IfModule>
