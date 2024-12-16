@@ -8,6 +8,8 @@ import ErrorBoundary from './components/api/ErrorBoundary';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import SuperAdminLogin from './pages/auth/SuperAdminLogin';
 import SuperAdminSignup from './pages/auth/SuperAdminSignup';
 import SuperAdminLayout from './pages/SuperAdmin/Layout';
@@ -94,6 +96,30 @@ const App = () => {
           element={
             !user ? (
               <Signup />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            !user ? (
+              <ForgotPassword />
+            ) : userRole === 'super_admin' ? (
+              <Navigate to="/super-admin" />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            !user ? (
+              <ResetPassword />
             ) : userRole === 'super_admin' ? (
               <Navigate to="/super-admin" />
             ) : (

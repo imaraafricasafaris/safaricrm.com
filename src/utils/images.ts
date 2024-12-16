@@ -11,6 +11,8 @@ const Images = {
   leads1: '/img/leads_1.png',
   leads2: '/img/leads_2.png',
   staff: '/img/staff.png',
+  maasai: '/img/tanzania-maasai.jpg',
+  safari2: '/img/safari-2.jpg',
 
   // Partner logos
   tripAdvisor: '/img/partners/tripadvisor.png',

@@ -12,6 +12,8 @@ interface AuthContextType {
   signIn: (email: string, password: string, role?: UserRole) => Promise<void>;
   signUp: (email: string, password: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -199,16 +201,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) throw error;
+  };
+
+  const value = {
+    user,
+    loading,
+    userRole,
+    error,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    updatePassword,
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      userRole,
-      error,
-      signIn,
-      signUp,
-      signOut
-    }}>
+    <AuthContext.Provider value={value}>
       {initialized ? children : null}
     </AuthContext.Provider>
   );
