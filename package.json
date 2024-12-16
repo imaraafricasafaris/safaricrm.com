@@ -1,6 +1,6 @@
 {
   "name": "safari-crm",
-  "homepage": "/public_html",
+  "homepage": ".",
   "private": true,
   "version": "1.0.0",
   "type": "module",
