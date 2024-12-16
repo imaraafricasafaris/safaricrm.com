@@ -1,0 +1,31 @@
+# Set correct MIME types for JavaScript modules
+AddType application/javascript .js
+AddType application/javascript .mjs
+AddType text/javascript .js
+AddType text/javascript .mjs
+
+# Handle JSON files
+AddType application/json .json
+
+# Handle TypeScript files
+AddType application/x-typescript .ts
+AddType application/x-typescript .tsx
+
+# Enable CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Serve all files with UTF-8 encoding
+AddDefaultCharset utf-8
+
+# Handle routing for SPA
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.html$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-l
+    RewriteRule . /index.html [L]
+</IfModule>
