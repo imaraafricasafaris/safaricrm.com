@@ -18,8 +18,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    sourcemap: false,
     rollupOptions: {
       output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@headlessui/react', 'lucide-react', 'framer-motion'],
+        },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: ({name}) => {
@@ -33,8 +38,12 @@ export default defineConfig({
         },
       },
     },
-    assetsInlineLimit: 4096,
-    sourcemap: false,
     minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
 });
