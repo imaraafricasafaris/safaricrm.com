@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Images } from '../utils/images';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,16 +13,19 @@ export default function UpdatePassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { updatePassword } = useAuth();
 
   useEffect(() => {
     // Check if we have the access token in the URL
-    const hash = window.location.hash;
-    if (!hash || !hash.includes('access_token')) {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    
+    if (!token) {
       toast.error('Invalid or expired reset link');
       navigate('/login');
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +44,7 @@ export default function UpdatePassword() {
 
     try {
       await updatePassword(password);
-      toast.success('Password updated successfully!');
+      toast.success('Password updated successfully! Please login with your new password.');
       navigate('/login');
     } catch (error: any) {
       toast.error(error.message || 'Failed to update password');
