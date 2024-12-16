@@ -4,7 +4,7 @@ import { Lock, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Images } from '../utils/images';
 import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../utils/supabase';
 
 export default function UpdatePassword() {
   const [password, setPassword] = useState('');
@@ -14,18 +14,42 @@ export default function UpdatePassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { updatePassword } = useAuth();
 
   useEffect(() => {
-    // Check if we have the access token in the URL
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    
-    if (!token) {
-      toast.error('Invalid or expired reset link');
-      navigate('/login');
-    }
-  }, [navigate, location]);
+    const handlePasswordReset = async () => {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (!accessToken) {
+          console.error('No access token found in URL');
+          toast.error('Invalid or expired reset link');
+          navigate('/login');
+          return;
+        }
+
+        // Set the session
+        const { data: { session }, error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || '',
+        });
+
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          throw sessionError;
+        }
+
+        console.log('Session set successfully:', session);
+      } catch (error: any) {
+        console.error('Error handling password reset:', error);
+        toast.error('Failed to validate reset link');
+        navigate('/login');
+      }
+    };
+
+    handlePasswordReset();
+  }, [navigate]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,10 +67,25 @@ export default function UpdatePassword() {
     setIsLoading(true);
 
     try {
-      await updatePassword(password);
+      console.log('Updating password...');
+      const { data, error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      console.log('Update password response:', { data, error });
+
+      if (error) {
+        console.error('Update password error:', error);
+        throw error;
+      }
+
+      // Sign out after successful password update
+      await supabase.auth.signOut();
+      
       toast.success('Password updated successfully! Please login with your new password.');
       navigate('/login');
     } catch (error: any) {
+      console.error('Update password caught error:', error);
       toast.error(error.message || 'Failed to update password');
     } finally {
       setIsLoading(false);

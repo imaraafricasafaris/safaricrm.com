@@ -14,5 +14,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
+    debug: true, // Enable debug logs
+    storage: window.localStorage,
+    storageKey: 'safari-crm-auth',
+    redirectTo: `${window.location.origin}/update-password`,
   },
 });

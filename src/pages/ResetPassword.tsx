@@ -4,23 +4,36 @@ import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Images } from '../utils/images';
 import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../utils/supabase'; // Import supabase directly for password reset
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const { resetPassword } = useAuth();
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await resetPassword(email);
+      console.log('Initiating password reset for:', email);
+      console.log('Current origin:', window.location.origin);
+
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      console.log('Reset password response:', { data, error });
+
+      if (error) {
+        console.error('Reset password error:', error);
+        throw error;
+      }
+
       setIsSuccess(true);
       toast.success('Password reset link sent to your email!');
     } catch (error: any) {
+      console.error('Reset password caught error:', error);
       toast.error(error.message || 'Failed to send reset link');
     } finally {
       setIsLoading(false);
@@ -28,7 +41,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-white">
       {/* Left Section - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <motion.div
