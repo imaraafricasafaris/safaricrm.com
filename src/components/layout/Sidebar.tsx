@@ -8,6 +8,7 @@ import {
   Building2, CreditCard, GitBranch, Terminal 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import logo from '../../assets/logo.svg';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -107,7 +108,7 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileMenuOpen, onMob
         className="h-16 w-full px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Map className="w-6 h-6 text-primary flex-shrink-0" />
+          <img src={logo} alt="Safari CRM" className="w-8 h-8 flex-shrink-0" />
           <span
             className={`
               font-semibold text-nav text-gray-900 dark:text-white

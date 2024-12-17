@@ -1,198 +1,166 @@
-import React, { useState, useMemo } from 'react';
-import { MoreHorizontal, Mail, Phone, Shield, Building2 } from 'lucide-react';
-import { format } from 'date-fns';
+import React from 'react';
 import { Staff } from '../../types/staff';
-import StaffActions from './StaffActions';
-import { useOffices } from '../../contexts/OfficeContext';
+import { Checkbox } from '../ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
+import { MoreVertical } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface StaffListProps {
   staff: Staff[];
   isLoading: boolean;
-  viewMode: 'list' | 'grid';
-  isMobile?: boolean;
+  viewMode: 'grid' | 'list';
+  selectedStaff: Set<string>;
+  onSelectStaff: (staffId: string, checked: boolean) => void;
+  onAction: (staff: Staff, event: React.MouseEvent) => void;
 }
 
-export default function StaffList({ staff, isLoading, viewMode, isMobile }: StaffListProps) {
-  const [activeMenu, setActiveMenu] = useState<{ id: string; position: { top: number; left: number } } | null>(null);
-  const { offices } = useOffices();
+export default function StaffList({ 
+  staff, 
+  isLoading, 
+  viewMode, 
+  selectedStaff, 
+  onSelectStaff,
+  onAction 
+}: StaffListProps) {
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
 
-  // Memoize office lookup for performance
-  const getStaffOffice = useMemo(() => {
-    return (staffMember: Staff) => {
-      const office = offices?.find(o => o.id === staffMember.office_id);
-      return office ? `${office.name} (${office.city})` : 'Not Assigned';
-    };
-  }, [offices]);
-
-  // Handle action button clicks
-  const handleActionClick = (e: React.MouseEvent, staffMember: Staff) => {
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    setActiveMenu({
-      id: staffMember.id,
-      position: {
-        top: rect.top + window.scrollY,
-        left: rect.left + window.scrollX,
-      },
-    });
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'bg-green-500';
+      case 'inactive':
+        return 'bg-gray-500';
+      case 'pending':
+        return 'bg-yellow-500';
+      default:
+        return 'bg-gray-500';
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="p-6 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto"></div>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (!staff || staff.length === 0) {
+  if (staff.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-        No staff members found.
+      <div className="text-center p-8">
+        <p className="text-gray-500 dark:text-gray-400">No staff members found</p>
+      </div>
+    );
+  }
+
+  if (viewMode === 'grid') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {staff.map((member) => (
+          <div 
+            key={member.id}
+            className="bg-white rounded-lg shadow-sm p-4 relative hover:shadow-md transition-shadow"
+          >
+            <div className="absolute top-2 right-2 flex items-center gap-2">
+              <Checkbox
+                checked={selectedStaff.has(member.id)}
+                onCheckedChange={(checked) => onSelectStaff(member.id, checked as boolean)}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={(e) => onAction(member, e)}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Avatar className="h-20 w-20 mb-4">
+                <AvatarImage src={member.avatar_url} />
+                <AvatarFallback>
+                  {getInitials(member.first_name, member.last_name)}
+                </AvatarFallback>
+              </Avatar>
+              <h3 className="font-semibold text-lg">
+                {member.first_name} {member.last_name}
+              </h3>
+              <p className="text-gray-500 text-sm mb-2">{member.role}</p>
+              <Badge variant="secondary" className={getStatusColor(member.status)}>
+                {member.status}
+              </Badge>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
-    <div>
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+    <div className="bg-white rounded-lg shadow-sm">
+      <table className="min-w-full">
+        <thead>
+          <tr className="border-b">
+            <th className="py-3 px-4 text-left">
+              <Checkbox
+                checked={staff.length > 0 && staff.every(s => selectedStaff.has(s.id))}
+                onCheckedChange={(checked) => staff.forEach(s => onSelectStaff(s.id, checked as boolean))}
+              />
+            </th>
+            <th className="py-3 px-4 text-left">Name</th>
+            <th className="py-3 px-4 text-left">Role</th>
+            <th className="py-3 px-4 text-left">Status</th>
+            <th className="py-3 px-4 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
           {staff.map((member) => (
-            <div
-              key={member.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-all"
-            >
-              <div className="flex items-center justify-between mb-4">
+            <tr key={member.id} className="border-b hover:bg-gray-50">
+              <td className="py-3 px-4">
+                <Checkbox
+                  checked={selectedStaff.has(member.id)}
+                  onCheckedChange={(checked) => onSelectStaff(member.id, checked as boolean)}
+                />
+              </td>
+              <td className="py-3 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-lg font-medium text-primary">
-                      {member.full_name[0]?.toUpperCase() || ''}
-                    </span>
-                  </div>
+                  <Avatar>
+                    <AvatarImage src={member.avatar_url} />
+                    <AvatarFallback>
+                      {getInitials(member.first_name, member.last_name)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                      {member.full_name}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {member.email || 'No email provided'}
-                    </p>
+                    <div className="font-medium">
+                      {member.first_name} {member.last_name}
+                    </div>
+                    <div className="text-sm text-gray-500">{member.email}</div>
                   </div>
                 </div>
-                <button
-                  onClick={(e) => handleActionClick(e, member)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
-                >
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  member.status === 'active'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200'
-                }`}>
-                  {member.role}
-                </span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  member.status === 'active'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200'
-                }`}>
+              </td>
+              <td className="py-3 px-4">{member.role}</td>
+              <td className="py-3 px-4">
+                <Badge variant="secondary" className={getStatusColor(member.status)}>
                   {member.status}
-                </span>
-              </div>
-            </div>
+                </Badge>
+              </td>
+              <td className="py-3 px-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => onAction(member, e)}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </td>
+            </tr>
           ))}
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Staff Member
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Branch
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Last Login
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {staff.map((member) => (
-                <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center">
-                        <span className="text-primary-600 dark:text-primary-400 font-medium">
-                          {member.full_name[0]?.toUpperCase() || ''}
-                        </span>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {member.full_name}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {member.email || 'No email provided'}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-200">
-                      {member.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <Building2 className="w-4 h-4 mr-2" />
-                      {getStaffOffice(member)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      member.status === 'active'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-200'
-                    }`}>
-                      {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {member.last_login ? format(new Date(member.last_login), 'MMM d, yyyy HH:mm') : 'Never'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={(e) => handleActionClick(e, member)}
-                      className="p-1 text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-100"
-                    >
-                      <MoreHorizontal className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      {activeMenu && (
-        <StaffActions
-          staffId={activeMenu.id}
-          position={activeMenu.position}
-          onClose={() => setActiveMenu(null)}
-        />
-      )}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { GitBranch, Plus, Search, MapPin, Globe, DollarSign, Users, BarChart3 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import TimezoneSelect from 'react-timezone-select';
+import TimezoneSelect, { allTimezones } from 'react-timezone-select';
 import Select, { SingleValue } from 'react-select';
 import { getOffices, createOffice, updateOffice, deleteOffice } from '../lib/api/offices';
 import { Office, OfficeFormData } from '../types/office';
 import toast from 'react-hot-toast';
+import { useError } from '../contexts/ErrorContext';
 
 interface TimezoneOption {
   value: string;
@@ -27,12 +28,15 @@ const currencies = [
 ];
 
 export default function Branches() {
+  const { handleError } = useError();
   const [offices, setOffices] = useState<Office[]>([]);
   const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTimezone, setSelectedTimezone] = useState<TimezoneOption | null>(null);
+  const [selectedTimezone, setSelectedTimezone] = useState<any>(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<OfficeFormData>();
 
@@ -40,13 +44,23 @@ export default function Branches() {
     loadOffices();
   }, []);
 
+  useEffect(() => {
+    if (selectedOffice) {
+      setSelectedTimezone({ value: selectedOffice.timezone, label: selectedOffice.timezone });
+      reset(selectedOffice);
+    } else {
+      const defaultTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      setSelectedTimezone({ value: defaultTimezone, label: defaultTimezone });
+      reset();
+    }
+  }, [selectedOffice, reset]);
+
   const loadOffices = async () => {
     try {
       const data = await getOffices();
       setOffices(data);
     } catch (error) {
-      console.error('Error loading offices:', error);
-      toast.error('Failed to load branches');
+      handleError(error as Error, 'Loading Branches');
       setOffices([]);
     }
   };
@@ -54,18 +68,17 @@ export default function Branches() {
   const onSubmit = async (data: OfficeFormData) => {
     try {
       setIsLoading(true);
+      const officeData = {
+        ...data,
+        timezone: selectedTimezone.value || 'UTC',
+      };
+
       if (selectedOffice) {
-        if (!data.timezone) {
-          data.timezone = 'UTC';
-        }
-        await updateOffice(selectedOffice.id, data);
+        await updateOffice(selectedOffice.id, officeData);
         toast.success('Branch updated successfully');
       } else {
-        if (!data.timezone) {
-          data.timezone = 'UTC';
-        }
         await createOffice({
-          ...data,
+          ...officeData,
           company_id: '00000000-0000-0000-0000-000000000000', // Replace with actual company ID
           status: 'active',
           settings: {}
@@ -76,8 +89,7 @@ export default function Branches() {
       setShowForm(false);
       reset();
     } catch (error) {
-      console.error('Error saving branch:', error);
-      toast.error('Failed to save branch');
+      handleError(error as Error, 'Saving Branch');
     } finally {
       setIsLoading(false);
     }
@@ -91,8 +103,7 @@ export default function Branches() {
       toast.success('Branch deleted successfully');
       loadOffices();
     } catch (error) {
-      console.error('Error deleting branch:', error);
-      toast.error('Failed to delete branch');
+      handleError(error as Error, 'Deleting Branch');
     }
   };
 
@@ -105,6 +116,7 @@ export default function Branches() {
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <GitBranch className="w-8 h-8 text-primary" />
@@ -204,13 +216,11 @@ export default function Branches() {
                   </label>
                   <TimezoneSelect
                     value={selectedTimezone}
-                    onChange={(tz: SingleValue<TimezoneOption>) => {
-                      if (tz) {
-                        setSelectedTimezone(tz);
-                        setValue('timezone', tz.value);
-                      }
+                    onChange={(tz) => {
+                      setSelectedTimezone(tz);
                     }}
                     className="text-sm"
+                    labelStyle="altName"
                   />
                 </div>
 
@@ -267,7 +277,6 @@ export default function Branches() {
                     onClick={() => {
                       setSelectedOffice(office);
                       setShowForm(true);
-                      reset(office);
                     }}
                     className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                   >
@@ -299,30 +308,14 @@ export default function Branches() {
 
               {/* Quick Stats */}
               <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
-                    <Users className="w-4 h-4 text-primary" />
-                    Staff
-                  </div>
-                  <span className="text-2xl font-semibold text-gray-900 dark:text-white">12</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <Users className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-300">0 Staff</span>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
-                    <BarChart3 className="w-4 h-4 text-primary" />
-                    Revenue
-                  </div>
-                  <span className="text-2xl font-semibold text-gray-900 dark:text-white">$45k</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <BarChart3 className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-300">0 Sales</span>
                 </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  office.status === 'active'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                }`}>
-                  {office.status.charAt(0).toUpperCase() + office.status.slice(1)}
-                </span>
               </div>
             </div>
           ))}
