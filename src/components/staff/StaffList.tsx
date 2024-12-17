@@ -15,14 +15,14 @@ interface StaffListProps {
   onAction: (staff: Staff, event: React.MouseEvent) => void;
 }
 
-export default function StaffList({ 
-  staff, 
-  isLoading, 
-  viewMode, 
-  selectedStaff, 
-  onSelectStaff,
-  onAction 
-}: StaffListProps) {
+interface StaffCardProps {
+  staff: Staff;
+  selected: boolean;
+  onSelect: (checked: boolean) => void;
+  onAction: (event: React.MouseEvent) => void;
+}
+
+function StaffCard({ staff, selected, onSelect, onAction }: StaffCardProps) {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
@@ -40,6 +40,51 @@ export default function StaffList({
     }
   };
 
+  return (
+    <div 
+      className="bg-white rounded-lg shadow-sm p-4 relative hover:shadow-md transition-shadow"
+    >
+      <div className="absolute top-2 right-2 flex items-center gap-2">
+        <Checkbox
+          checked={selected}
+          onCheckedChange={onSelect}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={onAction}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </div>
+      <div className="flex flex-col items-center text-center">
+        <Avatar className="h-20 w-20 mb-4">
+          <AvatarImage src={staff.avatar_url} />
+          <AvatarFallback>
+            {getInitials(staff.first_name, staff.last_name)}
+          </AvatarFallback>
+        </Avatar>
+        <h3 className="font-semibold text-lg">
+          {staff.first_name} {staff.last_name}
+        </h3>
+        <p className="text-gray-500 text-sm mb-2">{staff.role}</p>
+        <Badge variant="secondary" className={getStatusColor(staff.status)}>
+          {staff.status}
+        </Badge>
+      </div>
+    </div>
+  );
+}
+
+export default function StaffList({ 
+  staff, 
+  isLoading, 
+  viewMode, 
+  selectedStaff, 
+  onSelectStaff,
+  onAction 
+}: StaffListProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -58,42 +103,15 @@ export default function StaffList({
 
   if (viewMode === 'grid') {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {staff.map((member) => (
-          <div 
+          <StaffCard 
             key={member.id}
-            className="bg-white rounded-lg shadow-sm p-4 relative hover:shadow-md transition-shadow"
-          >
-            <div className="absolute top-2 right-2 flex items-center gap-2">
-              <Checkbox
-                checked={selectedStaff.has(member.id)}
-                onCheckedChange={(checked) => onSelectStaff(member.id, checked as boolean)}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={(e) => onAction(member, e)}
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Avatar className="h-20 w-20 mb-4">
-                <AvatarImage src={member.avatar_url} />
-                <AvatarFallback>
-                  {getInitials(member.first_name, member.last_name)}
-                </AvatarFallback>
-              </Avatar>
-              <h3 className="font-semibold text-lg">
-                {member.first_name} {member.last_name}
-              </h3>
-              <p className="text-gray-500 text-sm mb-2">{member.role}</p>
-              <Badge variant="secondary" className={getStatusColor(member.status)}>
-                {member.status}
-              </Badge>
-            </div>
-          </div>
+            staff={member}
+            selected={selectedStaff.has(member.id)}
+            onSelect={(checked) => onSelectStaff(member.id, checked)}
+            onAction={(e) => onAction(member, e)}
+          />
         ))}
       </div>
     );

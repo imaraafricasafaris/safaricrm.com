@@ -1,89 +1,256 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Staff } from '../../types/staff';
-import { Building2, Mail, Phone, Users } from 'lucide-react';
+import { Card } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Mail, Phone, Building2, MapPin, ChevronDown, ChevronUp, Calendar, Briefcase } from 'lucide-react';
+import { StaffActions } from './StaffActions';
+import { formatDate } from '../../lib/utils';
+import cn from 'classnames';
 
 interface StaffCardProps {
   staff: Staff;
+  viewMode: 'grid' | 'list';
+  onEdit: () => void;
 }
 
-export default function StaffCard({ staff }: StaffCardProps) {
-  const fullName = staff.full_name || `${staff.first_name} ${staff.last_name}`;
-  
+export default function StaffCard({ staff, viewMode, onEdit }: StaffCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100';
+      case 'inactive':
+        return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
+      case 'pending':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100';
+      default:
+        return 'bg-gray-50 text-gray-700';
+    }
+  };
+
+  const getRoleBadgeStyle = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'guide':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'manager':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const formatAddress = (address: any) => {
+    if (!address) return 'No address provided';
+    if (typeof address === 'object') {
+      const parts = [
+        address.street,
+        address.city,
+        address.state,
+        address.country,
+        address.postal_code
+      ].filter(Boolean);
+      return parts.join(', ') || 'No address provided';
+    }
+    return address;
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 w-full">
-      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-        <div className="relative">
-          <img
-            src={staff.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`}
-            alt={fullName}
-            className="w-20 h-20 rounded-full object-cover ring-2 ring-primary/20"
-          />
-          <span
-            className={`absolute bottom-0 right-0 w-4 h-4 border-2 border-white dark:border-gray-800 rounded-full ${
-              staff.status === 'active'
-                ? 'bg-green-500'
-                : staff.status === 'pending'
-                ? 'bg-yellow-500'
-                : 'bg-gray-500'
-            }`}
-          />
-        </div>
+    <Card className={cn(
+      'overflow-hidden transition-all duration-200',
+      viewMode === 'list' ? 'rounded-none border-0' : 'hover:shadow-lg',
+      isExpanded && 'bg-accent/5'
+    )}>
+      <div className={cn(
+        'flex w-full p-4',
+        viewMode === 'list' 
+          ? 'flex-col sm:grid sm:grid-cols-[280px,200px,180px,100px,100px,80px] sm:items-center gap-4' 
+          : 'flex-col gap-3'
+      )}>
+        {/* Staff Info */}
+        <div className={cn(
+          'flex gap-3',
+          viewMode === 'list' ? 'items-center' : 'items-start'
+        )}>
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {staff.first_name?.[0]}{staff.last_name?.[0]}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="flex-1 min-w-0">
-          <div className="text-center sm:text-left">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-              {fullName}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-              {staff.role}
-            </p>
-          </div>
-
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <Mail className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{staff.email}</span>
-            </div>
-            {staff.phone && (
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>{staff.phone}</span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h3 className="font-medium leading-none">
+                  {staff.first_name} {staff.last_name}
+                </h3>
+                <div className="mt-1">
+                  <Badge className={cn('font-normal', getRoleBadgeStyle(staff.role))}>
+                    {staff.role}
+                  </Badge>
+                </div>
               </div>
-            )}
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <Building2 className="w-4 h-4 flex-shrink-0" />
-              <span>{staff.branch || 'Not Assigned'}</span>
+              {viewMode === 'list' && (
+                <div className="flex sm:hidden">
+                  <StaffActions onEdit={onEdit} staff={staff} />
+                </div>
+              )}
             </div>
-            {staff.department && (
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <Users className="w-4 h-4 flex-shrink-0" />
-                <span>{staff.department}</span>
-              </div>
-            )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
-          <div className="flex items-center justify-between sm:flex-col sm:items-end text-sm">
-            <span className="text-gray-500 dark:text-gray-400">Last Active</span>
-            <span className="text-gray-900 dark:text-white ml-2 sm:ml-0">
-              {staff.last_activity ? new Date(staff.last_activity).toLocaleDateString() : 'Never'}
-            </span>
+        {/* List View Mobile Info */}
+        {viewMode === 'list' && (
+          <div className="sm:hidden space-y-3 mt-2">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="h-3.5 w-3.5" />
+                <span className="truncate">{staff.email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Building2 className="h-3.5 w-3.5" />
+                <span className="capitalize">{staff.branch || 'No branch'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Briefcase className="h-3.5 w-3.5" />
+                <span className="capitalize">{staff.department || 'No department'}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <Badge className={cn('text-xs capitalize', getStatusColor(staff.status))}>
+                {staff.status}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="gap-1"
+              >
+                {isExpanded ? 'Less' : 'More'}
+                {isExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center justify-between sm:flex-col sm:items-end text-sm">
-            <span className="text-gray-500 dark:text-gray-400">Status</span>
-            <span className={`capitalize px-2 py-1 rounded-full text-xs font-medium ${
-              staff.status === 'active'
-                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                : staff.status === 'pending'
-                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-            }`}>
-              {staff.status}
-            </span>
-          </div>
-        </div>
+        )}
+
+        {/* List View Desktop Columns */}
+        {viewMode === 'list' && (
+          <>
+            <div className="hidden sm:flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="h-3.5 w-3.5" />
+                <span className="truncate">{staff.email}</span>
+              </div>
+            </div>
+
+            <div className="hidden sm:block">
+              <Badge className={cn('font-normal', getRoleBadgeStyle(staff.role))}>
+                {staff.role}
+              </Badge>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+              <Building2 className="h-3.5 w-3.5" />
+              <span className="capitalize">{staff.branch || 'No branch'}</span>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2">
+              <Badge className={cn('text-xs capitalize', getStatusColor(staff.status))}>
+                {staff.status}
+              </Badge>
+            </div>
+
+            <div className="hidden sm:flex items-center justify-end gap-2">
+              <StaffActions onEdit={onEdit} staff={staff} />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* Grid View Info */}
+        {viewMode === 'grid' && (
+          <>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="h-3.5 w-3.5" />
+                <span className="truncate">{staff.email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Building2 className="h-3.5 w-3.5" />
+                <span className="capitalize">{staff.branch}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className={cn('text-xs capitalize', getStatusColor(staff.status))}>
+                  {staff.status}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mt-2">
+              <StaffActions onEdit={onEdit} staff={staff} />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="gap-2"
+              >
+                {isExpanded ? 'Show Less' : 'Show More'}
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="border-t bg-accent/5 p-4 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <span>{staff.phone || 'No phone number'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>{formatAddress(staff.address)}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <span>Department: <span className="capitalize">{staff.department || 'Not assigned'}</span></span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span>Joined: {formatDate(staff.join_date) || 'Not available'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
