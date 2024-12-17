@@ -12,6 +12,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: ['openai']
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,

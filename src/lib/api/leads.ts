@@ -88,11 +88,101 @@ export async function getLeadTripTypes(): Promise<LeadTripType[]> {
 }
 
 // Create a new lead
-export async function createLead(lead: Omit<Lead, 'id' | 'created_at' | 'updated_at'>): Promise<Lead> {
+export async function createLead(data: {
+  // Lead base data
+  name: string;
+  email: string;
+  phone?: string;
+  country?: string;
+  status: string;
+  source: string;
+  lead_score?: number;
+  lead_temperature?: string;
+  notes?: string;
+  follow_up_priority?: string;
+  
+  // Lead details data
+  first_name: string;
+  last_name: string;
+  destinations: string[];
+  trip_type: string[];
+  duration: number;
+  preferred_dates?: string;
+  adults: number;
+  children: number;
+  budget?: number;
+  special_requirements?: string;
+  
+  // AI analysis data
+  ai_score?: number;
+  ai_score_explanation?: string;
+  ai_recommended_packages?: string[];
+  ai_recommended_activities?: string[];
+  ai_recommended_accommodations?: string[];
+  ai_follow_up_priority?: string;
+  ai_follow_up_approach?: string;
+  ai_follow_up_timeline?: string;
+  ai_follow_up_key_points?: string[];
+}) {
   try {
-    const { data, error } = await supabase.from('leads').insert(lead).select().single();
-    if (error) throw error;
-    return data as Lead;
+    // First create the lead
+    const { data: lead, error: leadError } = await supabase
+      .from('leads')
+      .insert({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
+        status: data.status,
+        source: data.source,
+        lead_score: data.lead_score,
+        lead_temperature: data.lead_temperature,
+        notes: data.notes,
+        follow_up_priority: data.follow_up_priority
+      })
+      .select()
+      .single();
+
+    if (leadError) throw leadError;
+
+    // Then create the lead details
+    const { data: leadDetails, error: detailsError } = await supabase
+      .from('lead_details')
+      .insert({
+        lead_id: lead.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
+        destinations: data.destinations,
+        trip_type: data.trip_type,
+        duration: data.duration,
+        preferred_dates: data.preferred_dates,
+        adults: data.adults,
+        children: data.children,
+        budget: data.budget,
+        special_requirements: data.special_requirements,
+        ai_score: data.ai_score,
+        ai_score_explanation: data.ai_score_explanation,
+        ai_recommended_packages: data.ai_recommended_packages,
+        ai_recommended_activities: data.ai_recommended_activities,
+        ai_recommended_accommodations: data.ai_recommended_accommodations,
+        ai_follow_up_priority: data.ai_follow_up_priority,
+        ai_follow_up_approach: data.ai_follow_up_approach,
+        ai_follow_up_timeline: data.ai_follow_up_timeline,
+        ai_follow_up_key_points: data.ai_follow_up_key_points
+      })
+      .select()
+      .single();
+
+    if (detailsError) {
+      // If lead details creation fails, delete the lead
+      await supabase.from('leads').delete().eq('id', lead.id);
+      throw detailsError;
+    }
+
+    return { ...lead, details: leadDetails };
   } catch (error) {
     console.error('Error creating lead:', error);
     throw error;

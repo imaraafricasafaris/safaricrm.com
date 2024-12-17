@@ -6,7 +6,7 @@ import { getLeads } from '../lib/api/leads';
 import { Lead } from '../types/leads';
 import LeadList from '../components/leads/LeadList';
 import FileUploadModal from '../components/leads/FileUploadModal';
-import LeadForm from '../components/leads/LeadForm';
+import MultiStepLeadForm from '../components/leads/MultiStepLeadForm';
 import LeadSidebar from '../components/leads/LeadSidebar';
 import BulkActionsMenu from '../components/leads/BulkActionsMenu';
 import SearchOverlay from '../components/leads/SearchOverlay';
@@ -172,20 +172,8 @@ export default function Leads() {
               <div className="fixed inset-0 transition-opacity" aria-hidden="true">
                 <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
               </div>
-              <div className="relative inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-                <div className="absolute top-0 right-0 pt-4 pr-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddForm(false)}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                  >
-                    <span className="sr-only">Close</span>
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                <LeadForm 
+              <div className="relative inline-block w-full max-w-[1200px] overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 rounded-xl shadow-xl">
+                <MultiStepLeadForm 
                   onSuccess={() => {
                     setShowAddForm(false);
                     loadLeads();
