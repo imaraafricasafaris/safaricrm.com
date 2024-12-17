@@ -165,6 +165,39 @@ export default function Leads() {
           onChange={setSearchTerm}
         />
 
+        {/* Lead Form */}
+        {showAddForm && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+              </div>
+              <div className="relative inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                <div className="absolute top-0 right-0 pt-4 pr-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                  >
+                    <span className="sr-only">Close</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <LeadForm 
+                  onSuccess={() => {
+                    setShowAddForm(false);
+                    loadLeads();
+                    toast.success('Lead added successfully');
+                  }}
+                  onCancel={() => setShowAddForm(false)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="flex-1 overflow-hidden min-h-[calc(100vh-12rem)]">
           <div className="bg-white dark:bg-gray-800 rounded-none md:rounded-lg shadow-sm overflow-hidden">
