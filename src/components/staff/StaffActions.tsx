@@ -33,15 +33,17 @@ import {
 } from "lucide-react";
 import { Staff } from "../../types/staff";
 import { useStaff } from "../../contexts/StaffContext";
+import { useOffices } from "../../contexts/OfficeContext";
 import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 import { TaskAssignment } from "./TaskAssignment";
 import { ActivityLogs } from "./ActivityLogs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import { supabase } from '../../lib/supabase';
 
 interface StaffActionsProps {
   staff: Staff;
@@ -59,6 +61,13 @@ export function StaffActions({ staff, onEdit }: StaffActionsProps) {
   const [showSuspendDialog, setShowSuspendDialog] = React.useState(false);
   const [showNotificationDialog, setShowNotificationDialog] = React.useState(false);
   const { deleteStaff, updateStaff } = useStaff();
+  const { offices, refreshOffices } = useOffices();
+
+  React.useEffect(() => {
+    if (showBranchDialog) {
+      refreshOffices();
+    }
+  }, [showBranchDialog, refreshOffices]);
 
   const handleDelete = async () => {
     try {
@@ -88,12 +97,56 @@ export function StaffActions({ staff, onEdit }: StaffActionsProps) {
     }
   };
 
-  const handleBranchChange = async (branch: string) => {
+  const handleBranchChange = async (value: string) => {
     try {
-      await updateStaff(staff.id, { branch });
-      toast.success('Branch updated successfully');
+      // Show loading toast
+      const loadingToast = toast.loading('Updating branch assignment...');
+      
+      // If value is "unassigned", set office_id to null
+      const office_id = value === "unassigned" ? null : value;
+      await updateStaff(staff.id, { office_id });
+      
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? 'animate-enter' : 'animate-leave'
+          } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 pt-0.5">
+                <Building2 className="h-10 w-10 text-green-500 p-2 bg-green-100 rounded-full" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {office_id ? 'Branch Updated' : 'Branch Unassigned'}
+                </p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {office_id
+                    ? `Successfully assigned to ${offices.find(o => o.id === office_id)?.name}`
+                    : 'Successfully removed branch assignment'}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex border-l border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ), {
+        duration: 3000,
+      });
+      
       setShowBranchDialog(false);
     } catch (error) {
+      console.error('Error updating branch:', error);
       toast.error('Failed to update branch');
     }
   };
@@ -254,29 +307,62 @@ export function StaffActions({ staff, onEdit }: StaffActionsProps) {
 
       {/* Branch Assignment Dialog */}
       <Dialog open={showBranchDialog} onOpenChange={setShowBranchDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]">
           <DialogHeader>
-            <DialogTitle>Assign Branch</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">Assign Branch</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">
+              Select a branch to assign this staff member to.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Select Branch</Label>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="branch" className="text-sm font-medium">Branch</Label>
               <Select
                 onValueChange={handleBranchChange}
-                defaultValue={staff.branch || ''}
+                defaultValue={staff.office_id || "unassigned"}
               >
-                <SelectTrigger>
+                <SelectTrigger id="branch" className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <SelectValue placeholder="Select branch" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nairobi">Nairobi HQ</SelectItem>
-                  <SelectItem value="mombasa">Mombasa Branch</SelectItem>
-                  <SelectItem value="kisumu">Kisumu Branch</SelectItem>
-                  <SelectItem value="nakuru">Nakuru Branch</SelectItem>
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <SelectItem value="unassigned" className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <span className="flex items-center">
+                      <Building2 className="mr-2 h-4 w-4 text-gray-500" />
+                      No Branch
+                    </span>
+                  </SelectItem>
+                  {offices?.map((office) => (
+                    <SelectItem 
+                      key={office.id} 
+                      value={office.id}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <span className="flex items-center">
+                        <Building2 className="mr-2 h-4 w-4 text-gray-500" />
+                        {office.name}
+                      </span>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowBranchDialog(false)}
+              className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={() => setShowBranchDialog(false)}
+              className="bg-primary text-white hover:bg-primary/90 transition-colors"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

@@ -6,7 +6,8 @@ import ErrorBoundary from './components/api/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 import SuperAdminLayout from './pages/SuperAdmin/Layout';
-import { ErrorProvider } from './contexts/ErrorContext'; // Assuming ErrorProvider is defined in this file
+import { ErrorProvider } from './contexts/ErrorContext';
+import { StaffProvider } from './contexts/StaffContext';
 
 // Pages
 import Landing from './pages/Landing';
@@ -42,154 +43,156 @@ const App = () => {
 
   return (
     <ErrorProvider>
-      <ErrorBoundary>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10B981',
-                secondary: '#fff',
+      <StaffProvider>
+        <ErrorBoundary>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#333',
+                color: '#fff',
               },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#fff',
+              success: {
+                iconTheme: {
+                  primary: '#10B981',
+                  secondary: '#fff',
+                },
               },
-            },
-          }}
-        />
-        <Routes>
-          {/* Public Routes */}
-          <Route
-            path="/"
-            element={
-              !user ? (
-                <Landing />
-              ) : userRole === 'super_admin' ? (
-                <Navigate to="/super-admin" />
-              ) : (
-                <Navigate to="/dashboard" />
-              )
-            }
+              error: {
+                iconTheme: {
+                  primary: '#EF4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
           />
-          <Route
-            path="/login"
-            element={
-              !user ? (
-                <Login />
-              ) : userRole === 'super_admin' ? (
-                <Navigate to="/super-admin" />
-              ) : (
-                <Navigate to="/dashboard" />
-              )
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              !user ? (
-                <Signup />
-              ) : userRole === 'super_admin' ? (
-                <Navigate to="/super-admin" />
-              ) : (
-                <Navigate to="/dashboard" />
-              )
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              !user ? (
-                <ResetPassword />
-              ) : userRole === 'super_admin' ? (
-                <Navigate to="/super-admin" />
-              ) : (
-                <Navigate to="/dashboard" />
-              )
-            }
-          />
-          <Route
-            path="/update-password"
-            element={
-              !user ? (
-                <UpdatePassword />
-              ) : userRole === 'super_admin' ? (
-                <Navigate to="/super-admin" />
-              ) : (
-                <Navigate to="/dashboard" />
-              )
-            }
-          />
-          <Route
-            path="/superadmin/login"
-            element={!user ? <SuperAdminLogin /> : <Navigate to="/super-admin" />}
-          />
-          <Route
-            path="/superadmin/signup"
-            element={!user ? <SuperAdminSignup /> : <Navigate to="/super-admin" />}
-          />
+          <Routes>
+            {/* Public Routes */}
+            <Route
+              path="/"
+              element={
+                !user ? (
+                  <Landing />
+                ) : userRole === 'super_admin' ? (
+                  <Navigate to="/super-admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                !user ? (
+                  <Login />
+                ) : userRole === 'super_admin' ? (
+                  <Navigate to="/super-admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                !user ? (
+                  <Signup />
+                ) : userRole === 'super_admin' ? (
+                  <Navigate to="/super-admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                !user ? (
+                  <ResetPassword />
+                ) : userRole === 'super_admin' ? (
+                  <Navigate to="/super-admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+            <Route
+              path="/update-password"
+              element={
+                !user ? (
+                  <UpdatePassword />
+                ) : userRole === 'super_admin' ? (
+                  <Navigate to="/super-admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              }
+            />
+            <Route
+              path="/superadmin/login"
+              element={!user ? <SuperAdminLogin /> : <Navigate to="/super-admin" />}
+            />
+            <Route
+              path="/superadmin/signup"
+              element={!user ? <SuperAdminSignup /> : <Navigate to="/super-admin" />}
+            />
 
-          {/* Super Admin Routes */}
-          <Route
-            path="/super-admin"
-            element={
-              <ProtectedRoute requiredRole="super_admin">
-                <SuperAdminLayout>
-                  <Outlet />
-                </SuperAdminLayout>
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<SuperAdminDashboard />} />
-            <Route path="companies" element={<Companies />} />
-            <Route path="users" element={<Users />} />
-            <Route path="subscriptions" element={<Subscriptions />} />
-            <Route path="api-keys" element={<ApiKeys />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+            {/* Super Admin Routes */}
+            <Route
+              path="/super-admin"
+              element={
+                <ProtectedRoute requiredRole="super_admin">
+                  <SuperAdminLayout>
+                    <Outlet />
+                  </SuperAdminLayout>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<SuperAdminDashboard />} />
+              <Route path="companies" element={<Companies />} />
+              <Route path="users" element={<Users />} />
+              <Route path="subscriptions" element={<Subscriptions />} />
+              <Route path="api-keys" element={<ApiKeys />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
 
-          {/* Main CRM Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute requiredRole="company">
-                <MainLayout>
-                  <Outlet />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          >
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="leads" element={<Leads />} />
-            <Route path="clients" element={<Clients />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route path="calendar" element={<Calendar />} />
-            <Route path="documents" element={<Documents />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="staff" element={<Staff />} />
-            <Route path="staff/:name" element={<StaffProfilePage />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="subscription" element={<Subscription />} />
-            <Route path="branches" element={<Branches />} />
-            <Route path="modules" element={<Modules />} />
-          </Route>
+            {/* Main CRM Routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute requiredRole="company">
+                  <MainLayout>
+                    <Outlet />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            >
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="leads" element={<Leads />} />
+              <Route path="clients" element={<Clients />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="calendar" element={<Calendar />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="staff" element={<Staff />} />
+              <Route path="staff/:name" element={<StaffProfilePage />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="subscription" element={<Subscription />} />
+              <Route path="branches" element={<Branches />} />
+              <Route path="modules" element={<Modules />} />
+            </Route>
 
-          {/* Catch-all redirect */}
-          <Route
-            path="*"
-            element={<Navigate to={!user ? '/login' : userRole === 'super_admin' ? '/super-admin' : '/dashboard'} replace />}
-          />
-        </Routes>
-      </ErrorBoundary>
+            {/* Catch-all redirect */}
+            <Route
+              path="*"
+              element={<Navigate to={!user ? '/login' : userRole === 'super_admin' ? '/super-admin' : '/dashboard'} replace />}
+            />
+          </Routes>
+        </ErrorBoundary>
+      </StaffProvider>
     </ErrorProvider>
   );
 };

@@ -14,8 +14,9 @@ export interface Staff {
   status: StaffStatus;
   availability_status: AvailabilityStatus;
   avatar_url?: string;
-  branch?: string;
   office_id?: string;
+  office_name?: string;
+  branch_name?: string;
   permissions?: {
     leads?: boolean;
     safaris?: boolean;

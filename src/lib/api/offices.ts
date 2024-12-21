@@ -1,4 +1,4 @@
-import { supabase } from '../supabase';
+import { supabase, handleSupabaseError } from '../supabase';
 import { Office, StaffOffice, OfficeMetrics } from '../../types/office';
 
 export async function getOffices() {
@@ -8,10 +8,15 @@ export async function getOffices() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data as Office[];
-  } catch (err) {
-    handleSupabaseError(err, 'Failed to fetch offices');
+    if (error) {
+      console.error('Error loading offices:', error);
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error loading offices:', error);
+    handleSupabaseError(error, 'Failed to load offices');
     return [];
   }
 }

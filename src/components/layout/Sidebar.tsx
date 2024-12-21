@@ -33,8 +33,7 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileMenuOpen, onMob
   const coreNavItems = [
     // Core modules (always visible)
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', moduleId: 'dashboard' },
-    { name: 'Leads', icon: UserPlus, path: '/leads', moduleId: 'leads' },
-    { name: 'Modules', icon: Grid, path: '/modules', moduleId: 'modules' }
+    { name: 'Leads', icon: UserPlus, path: '/leads', moduleId: 'leads' }
   ];
 
   // Optional modules
@@ -47,17 +46,18 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileMenuOpen, onMob
     { name: 'Branches', icon: GitBranch, path: '/branches', moduleId: 'office-management', optional: true }
   ];
 
+  // Bottom navigation items
+  const bottomNavItems = [
+    { name: 'Modules', icon: Grid, path: '/modules', moduleId: 'modules' },
+    { name: 'Settings', icon: Settings2, path: '/settings', moduleId: 'settings' },
+    { name: 'Notifications', icon: Bell, path: '/notifications', moduleId: 'notifications' },
+    { name: 'Subscription', icon: CreditCard, path: '/subscription' }
+  ];
+
   // Combine and filter navigation items
   const navigationItems = [
     ...coreNavItems,
     ...optionalNavItems.filter(item => isModuleAccessible(item))
-  ];
-
-  // Core bottom navigation items
-  const coreBottomNavItems = [
-    { name: 'Settings', icon: Settings2, path: '/settings', moduleId: 'settings' },
-    { name: 'Notifications', icon: Bell, path: '/notifications', moduleId: 'notifications' },
-    { name: 'Subscription', icon: CreditCard, path: '/subscription' },
   ];
 
   const handleNavigation = (item: { moduleId?: string; path: string; name: string }) => {
@@ -102,106 +102,106 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileMenuOpen, onMob
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
-      {/* Header/Logo */}
-      <button
-        onClick={onToggle}
-        className="h-16 w-full px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="Safari CRM" className="w-8 h-8 flex-shrink-0" />
-          <span
-            className={`
-              font-semibold text-nav text-gray-900 dark:text-white
-              ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}
-              transition-all duration-300
-            `}
-          >
-            Safari CRM
-          </span>
-        </div>
-        {!isCollapsed && <ChevronLeft className="w-4 h-4 text-gray-400" />}
-      </button>
+        {/* Header/Logo */}
+        <button
+          onClick={onToggle}
+          className="h-16 w-full px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Safari CRM" className="w-8 h-8 flex-shrink-0" />
+            <span
+              className={`
+                font-semibold text-nav text-gray-900 dark:text-white
+                ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}
+                transition-all duration-300
+              `}
+            >
+              Safari CRM
+            </span>
+          </div>
+          {!isCollapsed && <ChevronLeft className="w-4 h-4 text-gray-400" />}
+        </button>
 
-      {/* Main Navigation */}
-      <div className="flex-1 flex flex-col h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide">
-        <nav className="flex-1 p-2 space-y-1">
-          {/* Only render visible navigation items */}
-          {navigationItems.map((item) => {
-            const isActive = currentPath === item.path.split('/').pop();
-            const Icon = item.icon;
+        {/* Main Navigation */}
+        <div className="flex-1 flex flex-col h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide">
+          <nav className="flex-1 p-2 space-y-1">
+            {/* Only render visible navigation items */}
+            {navigationItems.map((item) => {
+              const isActive = currentPath === item.path.split('/').pop();
+              const Icon = item.icon;
 
-            return (
-              <button
-                key={item.path}
-                onClick={() => handleNavigation(item)}
-                className={`
-                  w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-nav transition-colors
-                  ${isActive
-                    ? 'bg-primary text-black'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
-                  }
-                  ${isCollapsed ? 'justify-center' : ''}
-                `}
-              >
-                <Icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`} />
-                <span
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavigation(item)}
                   className={`
-                    whitespace-nowrap
-                    ${isCollapsed ? 'hidden' : 'block'}
+                    w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-nav transition-colors
+                    ${isActive
+                      ? 'bg-primary text-black'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                    }
+                    ${isCollapsed ? 'justify-center' : ''}
                   `}
                 >
-                  {item.name}
-                </span>
-                {isCollapsed && (
-                  <Tooltip content={item.name} position="right">
-                    <span className="sr-only">{item.name}</span>
-                  </Tooltip>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`} />
+                  <span
+                    className={`
+                      whitespace-nowrap
+                      ${isCollapsed ? 'hidden' : 'block'}
+                    `}
+                  >
+                    {item.name}
+                  </span>
+                  {isCollapsed && (
+                    <Tooltip content={item.name} position="right">
+                      <span className="sr-only">{item.name}</span>
+                    </Tooltip>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
 
-        {/* Bottom Navigation */}
-        <div className="p-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
-          {/* Only render visible bottom navigation items */}
-          {coreBottomNavItems.map((item) => {
-            const isActive = currentPath === item.path.split('/').pop();
-            const Icon = item.icon;
+          {/* Bottom Navigation */}
+          <div className="p-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
+            {/* Only render visible bottom navigation items */}
+            {bottomNavItems.map((item) => {
+              const isActive = currentPath === item.path.split('/').pop();
+              const Icon = item.icon;
 
-            return (
-              <button
-                key={item.path}
-                onClick={() => handleNavigation(item)}
-                className={`
-                  w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-nav transition-colors
-                  ${isActive
-                    ? 'bg-primary text-black'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
-                  }
-                  ${isCollapsed ? 'justify-center' : ''}
-                `}
-              >
-                <Icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`} />
-                <span
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavigation(item)}
                   className={`
-                    whitespace-nowrap
-                    ${isCollapsed ? 'hidden' : 'block'}
+                    w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-nav transition-colors
+                    ${isActive
+                      ? 'bg-primary text-black'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                    }
+                    ${isCollapsed ? 'justify-center' : ''}
                   `}
                 >
-                  {item.name}
-                </span>
-                {isCollapsed && (
-                  <Tooltip content={item.name} position="right">
-                    <span className="sr-only">{item.name}</span>
-                  </Tooltip>
-                )}
-              </button>
-            );
-          })}
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`} />
+                  <span
+                    className={`
+                      whitespace-nowrap
+                      ${isCollapsed ? 'hidden' : 'block'}
+                    `}
+                  >
+                    {item.name}
+                  </span>
+                  {isCollapsed && (
+                    <Tooltip content={item.name} position="right">
+                      <span className="sr-only">{item.name}</span>
+                    </Tooltip>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
     </>
   );
 }

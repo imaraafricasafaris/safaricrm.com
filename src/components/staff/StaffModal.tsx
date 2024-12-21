@@ -45,7 +45,7 @@ const defaultSteps: Step[] = [
   {
     id: 3,
     name: "Location & Access",
-    fields: ["branch", "status", "availability_status"],
+    fields: ["office_id", "status", "availability_status"],
     icon: Building2,
     status: "upcoming",
   },
@@ -65,7 +65,7 @@ export default function StaffModal({ isOpen, onClose, staff }: StaffModalProps) 
       phone: "",
       role: "",
       department: "",
-      branch: "",
+      office_id: "",
       status: "active",
       availability_status: "available",
       permissions: {
@@ -296,11 +296,11 @@ export default function StaffModal({ isOpen, onClose, staff }: StaffModalProps) 
         return (
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="branch" className="text-sm font-medium text-gray-700">Branch</Label>
+              <Label htmlFor="office_id" className="text-sm font-medium text-gray-700">Office</Label>
               <Controller
-                name="branch"
+                name="office_id"
                 control={control}
-                rules={{ required: "Branch is required" }}
+                rules={{ required: "Office is required" }}
                 render={({ field }) => (
                   <div className="relative">
                     <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-20" />
@@ -309,7 +309,7 @@ export default function StaffModal({ isOpen, onClose, staff }: StaffModalProps) 
                       defaultValue={field.value}
                     >
                       <SelectTrigger className="h-11 pl-12 pr-4 rounded-lg border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white">
-                        <SelectValue placeholder="Select branch" />
+                        <SelectValue placeholder="Select office" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border border-gray-200 shadow-lg">
                         <SelectItem value="nairobi" className="hover:bg-purple-50">Nairobi HQ</SelectItem>
@@ -321,8 +321,8 @@ export default function StaffModal({ isOpen, onClose, staff }: StaffModalProps) 
                   </div>
                 )}
               />
-              {errors.branch && (
-                <p className="text-sm text-red-500">{errors.branch.message}</p>
+              {errors.office_id && (
+                <p className="text-sm text-red-500">{errors.office_id.message}</p>
               )}
             </div>
             <div className="space-y-2">

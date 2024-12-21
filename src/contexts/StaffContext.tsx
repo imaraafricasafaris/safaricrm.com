@@ -5,8 +5,8 @@ import { toast } from 'react-hot-toast';
 
 interface StaffContextType {
   staff: Staff[];
-  loading: boolean;
-  error: Error | null;
+  isLoading: boolean;
+  error: string | null;
   addStaff: (staffData: Partial<Staff>) => Promise<void>;
   updateStaff: (id: string, staffData: Partial<Staff>) => Promise<void>;
   deleteStaff: (id: string) => Promise<void>;
@@ -18,40 +18,52 @@ const StaffContext = createContext<StaffContextType | undefined>(undefined);
 
 export function StaffProvider({ children }: { children: React.ReactNode }) {
   const [staff, setStaff] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const getStaff = async () => {
     try {
-      setLoading(true);
-      setError(null); // Reset error state
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('staff')
-        .select('*')
+        .select(`
+          *,
+          office:offices (
+            id,
+            name
+          )
+        `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      setStaff(data || []);
+      // Transform the data to include office_name
+      const transformedData = data.map(staff => ({
+        ...staff,
+        office_name: staff.office ? staff.office.name : null
+      }));
+
+      setStaff(transformedData);
+      setError(null);
     } catch (error: any) {
-      console.error('Error fetching staff:', error);
-      setError(error);
-      toast.error(error.message || 'Failed to fetch staff members');
+      console.error('Error:', error);
+      setError(error.message);
+      toast.error('Failed to fetch staff');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const addStaff = async (staffData: Partial<Staff>) => {
     try {
-      setLoading(true);
-      setError(null); // Reset error state
+      setIsLoading(true);
+      setError(null);
       
-      // Get the current user's ID
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user found');
 
-      // Prepare the staff data
       const newStaffData = {
         ...staffData,
         user_id: user.id,
@@ -85,62 +97,76 @@ export function StaffProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No data returned from the server');
       }
 
-      setStaff((prev) => [data, ...prev]);
-      return data;
+      toast.success('Staff member added successfully');
+      getStaff(); // Refresh the staff list
     } catch (error: any) {
-      console.error('Add staff error:', error);
+      console.error('Error adding staff:', error);
       setError(error);
-      throw error;
+      toast.error(error.message || 'Failed to add staff member');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const updateStaff = async (id: string, staffData: Partial<Staff>) => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase
+      setIsLoading(true);
+      setError(null);
+
+      // Convert branch to office_id if it exists
+      const updateData = { ...staffData };
+      if ('branch' in updateData) {
+        updateData.office_id = updateData.branch;
+        delete updateData.branch;
+      }
+      delete updateData.branch_name; // Remove computed field
+
+      const { error } = await supabase
         .from('staff')
-        .update(staffData)
-        .eq('id', id)
-        .select()
-        .single();
+        .update(updateData)
+        .eq('id', id);
 
       if (error) throw error;
 
-      setStaff((prev) =>
-        prev.map((staff) => (staff.id === id ? { ...staff, ...data } : staff))
-      );
+      toast.success('Staff member updated successfully');
+      getStaff(); // Refresh the staff list
     } catch (error: any) {
+      console.error('Error updating staff:', error);
       setError(error);
-      throw error;
+      toast.error(error.message || 'Failed to update staff member');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const deleteStaff = async (id: string) => {
     try {
-      setLoading(true);
-      const { error } = await supabase.from('staff').delete().eq('id', id);
+      setIsLoading(true);
+      setError(null);
+
+      const { error } = await supabase
+        .from('staff')
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
 
-      setStaff((prev) => prev.filter((staff) => staff.id !== id));
+      toast.success('Staff member deleted successfully');
+      getStaff(); // Refresh the staff list
     } catch (error: any) {
+      console.error('Error deleting staff:', error);
       setError(error);
-      throw error;
+      toast.error(error.message || 'Failed to delete staff member');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const findStaffByName = (name: string) => {
-    const [firstName, lastName] = name.split('-');
+    const lowerName = name.toLowerCase();
     return staff.find(
-      (s) => 
-        s.first_name.toLowerCase() === firstName && 
-        s.last_name.toLowerCase() === lastName
+      (s) =>
+        `${s.first_name} ${s.last_name}`.toLowerCase().includes(lowerName)
     );
   };
 
@@ -150,7 +176,7 @@ export function StaffProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     staff,
-    loading,
+    isLoading,
     error,
     addStaff,
     updateStaff,

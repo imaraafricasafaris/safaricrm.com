@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Map, Mail, Lock, User, Phone, Building, AlertCircle } from 'lucide-react';
+import { Map, Mail, Lock, User, Phone, Building } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -56,26 +56,15 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-            company_name: formData.companyName,
-            phone: formData.phone
-          }
-        }
+      await signUp(formData.email, formData.password, {
+        companyName: formData.companyName,
+        fullName: formData.name
       });
 
-      if (authError) throw authError;
-
-      toast.success('Account created successfully!');
+      toast.success('Account created! Please check your email.');
       navigate('/login');
     } catch (error) {
       console.error('Signup error:', error);
-      toast.error('Failed to create account');
     } finally {
       setIsLoading(false);
     }
@@ -102,51 +91,55 @@ export default function Signup() {
         <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Full Name
               </label>
-              <div className="mt-1 relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   id="name"
                   name="name"
                   type="text"
-                  autoComplete="name"
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="pl-10 block w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Enter your full name"
+                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="John Doe"
                 />
               </div>
             </div>
 
-            {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Phone Number
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Email
               </label>
-              <div className="mt-1 relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
                   onChange={handleChange}
-                  className="pl-10 block w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Enter your phone number"
+                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="you@example.com"
                 />
               </div>
             </div>
 
-            {/* Company Name */}
             <div>
-              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Company Name
               </label>
-              <div className="mt-1 relative">
-                <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Building className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   id="companyName"
                   name="companyName"
@@ -154,68 +147,70 @@ export default function Signup() {
                   required
                   value={formData.companyName}
                   onChange={handleChange}
-                  className="pl-10 block w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Enter your company name"
+                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Your Company"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email address
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Phone (optional)
               </label>
-              <div className="mt-1 relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
                   onChange={handleChange}
-                  className="pl-10 block w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Enter your email"
+                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="+1 (555) 123-4567"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Password
               </label>
-              <div className="mt-1 relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-10 block w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Create a password"
+                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="••••••••"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Confirm Password
               </label>
-              <div className="mt-1 relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="confirm-password"
-                  name="confirm-password"
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
-                  autoComplete="new-password"
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="pl-10 block w-full appearance-none rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Confirm your password"
+                  className="block w-full pl-10 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="••••••••"
                 />
               </div>
             </div>
@@ -224,13 +219,9 @@ export default function Signup() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-black shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
               >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  'Create Account'
-                )}
+                {isLoading ? 'Creating account...' : 'Create account'}
               </button>
             </div>
           </form>
